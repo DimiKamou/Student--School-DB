@@ -1,0 +1,5 @@
+\set tenant '9710b7d2-c108-41ea-b2ca-53f81a025d07'
+\set group1 'f17fbeb2-bfc9-4b2c-b8df-10d388045643'
+\set group2 '218abf62-5cfd-4bad-8cdc-7e8ecd883b89'
+\set tag_int '3727cad4-bccb-47ff-939f-19b8ab1348e4'
+\set tag_src '758f9a7d-2ae9-433b-84f9-660bcbae3f74'
