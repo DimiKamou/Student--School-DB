@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, type Attention, type Todo } from '../lib/api'
+import { api, fmtDate, type Attention, type Todo } from '../lib/api'
 import { Pill } from '../components/Pill'
 
 /**
@@ -77,7 +77,7 @@ export default function Today() {
                       <strong>{t.students_outstanding}</strong>
                       <span className="muted"> of {t.students_expected}</span>
                     </td>
-                    <td className="muted tabular">{t.days_since}d ago</td>
+                    <td className="muted tabular" title={fmtDate(t.occurred_on)}>{t.days_since}d ago</td>
                     <td><Link to={`/assessments/${t.assessment_id}`}>Mark →</Link></td>
                   </tr>
                 ))}

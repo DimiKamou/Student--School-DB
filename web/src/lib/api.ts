@@ -83,3 +83,11 @@ export type StudentProfile = {
   trajectory: { group_label: string; subject_name: string; trajectory: string; shift: string | null }[]
   pooling: { pooling_verdict: string; n_frameworks: string } | null
 }
+
+/** Postgres dates arrive as ISO strings; never show a raw timestamp to a teacher. */
+export function fmtDate(d: string | null | undefined): string {
+  if (!d) return '—'
+  const t = new Date(d)
+  return Number.isNaN(t.getTime()) ? String(d)
+    : t.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { api, type Grid } from '../lib/api'
+import { api, fmtDate, type Grid } from '../lib/api'
 
 type Cell = { item_id: string; student_id: string; raw_value: number | null; status: string }
 const key = (s: string, i: string) => `${s}|${i}`
@@ -146,7 +146,7 @@ export default function Entry() {
         <div style={{ flex: 1, minWidth: 240 }}>
           <h1>{grid.assessment.title}</h1>
           <div className="muted">
-            {grid.assessment.group_label} · {grid.assessment.subject_name} · {grid.assessment.occurred_on}
+            {grid.assessment.group_label} · {grid.assessment.subject_name} · {fmtDate(grid.assessment.occurred_on)}
           </div>
         </div>
         <div className="row" style={{ gap: 10 }}>
