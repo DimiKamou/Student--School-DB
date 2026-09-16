@@ -44,6 +44,13 @@ for gi, g in enumerate([G1, G2]):
         })
 S = {s['code']: s for s in students}
 
+# Staff and logins, so the API has somebody to be.
+STAFF = [
+    {'id': U(), 'user': U(), 'name': 'Elena Papadaki',  'group': G1, 'roles': ['teacher']},
+    {'id': U(), 'user': U(), 'name': 'Marcus Reed',     'group': G2, 'roles': ['teacher']},
+    {'id': U(), 'user': U(), 'name': 'Sofia Andreou',   'group': None, 'roles': ['school_admin', 'teacher']},
+]
+
 # 14 assessments spread across the year
 assessments = []
 for k in range(14):
@@ -95,6 +102,24 @@ for s in students:
     w(f"INSERT INTO org.enrolment (tenant_id, student_id, teaching_group_id, from_date) "
       f"VALUES ('{TENANT}','{s['id']}','{s['group']}','2025-09-01');")
 
+for st in STAFF:
+    w(f"INSERT INTO platform.app_user (id, tenant_id, email, display_name) "
+      f"VALUES ('{st['user']}','{TENANT}','{st['name'].split()[0].lower()}@synthetic.test','{st['name']}');")
+    for role in st['roles']:
+        w(f"INSERT INTO platform.user_role (tenant_id, user_id, role) "
+          f"VALUES ('{TENANT}','{st['user']}','{role}');")
+    given, family = st['name'].split(' ', 1)
+    w(f"INSERT INTO org.person (id, tenant_id, given_name, family_name, is_staff, user_id) "
+      f"VALUES ('{st['id']}','{TENANT}','{given}','{family}',true,'{st['user']}');")
+    if st['group']:
+        w(f"INSERT INTO org.teaching_assignment (tenant_id, staff_id, teaching_group_id, role, from_date) "
+          f"VALUES ('{TENANT}','{st['id']}','{st['group']}','primary','2025-09-01');")
+    else:
+        # Admin teaches both, so the demo has one account that sees everything.
+        for g in (G1, G2):
+            w(f"INSERT INTO org.teaching_assignment (tenant_id, staff_id, teaching_group_id, role, from_date) "
+              f"VALUES ('{TENANT}','{st['id']}','{g}','co_teacher','2025-09-01');")
+
 for a in assessments:
     w(f"INSERT INTO gradebook.assessment (id, tenant_id, teaching_group_id, term_id, title, kind, "
       f"occurred_on, max_total) VALUES ('{a['id']}','{TENANT}','{a['group']}','{a['term']}',"
@@ -144,4 +169,4 @@ open('db/test/synthetic_ids.sql','w').write(f"""\\set tenant '{TENANT}'
 \\set tag_int '{TAGS['INT']}'
 \\set tag_src '{TAGS['SRC']}'
 """)
-print(f"students={len(students)} assessments={len(assessments)} results={len(rows)}")
+print(f"students={len(students)} staff={len(STAFF)} assessments={len(assessments)} results={len(rows)}")
