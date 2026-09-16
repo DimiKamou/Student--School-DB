@@ -115,6 +115,27 @@ CREATE UNIQUE INDEX user_role_uq ON platform.user_role
 CREATE INDEX user_role_lookup_ix ON platform.user_role (tenant_id, user_id);
 
 -- ---------------------------------------------------------------------------
+-- Role helpers. Defined here, immediately after platform.user_role, because
+-- views in later migrations reference them. app.can_see_student() lives in
+-- 009 instead: it needs the org tables, which do not exist yet.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION app.has_role(p_role text) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM platform.user_role ur
+    WHERE ur.tenant_id = app.current_tenant()
+      AND ur.user_id = app.current_user_id()
+      AND ur.role = p_role)
+$$;
+
+-- Whole-school readers. DPO is included for subject-access requests and is
+-- itself audited via platform.access_log.
+CREATE OR REPLACE FUNCTION app.is_school_wide() RETURNS boolean
+LANGUAGE sql STABLE AS $$
+  SELECT app.has_role('school_admin') OR app.has_role('dpo')
+$$;
+
+-- ---------------------------------------------------------------------------
 -- Access audit. Schools WILL be asked "who looked at my child's record".
 -- ---------------------------------------------------------------------------
 CREATE TABLE platform.access_log (

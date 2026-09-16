@@ -280,3 +280,6 @@ UNION ALL
          'gate has neither a threshold_value nor a coefficient to derive one from'
   FROM ref.admission_gate g
   WHERE g.threshold_value IS NULL AND g.coefficient IS NULL;
+
+-- v_pooling_check and v_config_errors were just recreated; re-secure them.
+SELECT app.secure_all_views();

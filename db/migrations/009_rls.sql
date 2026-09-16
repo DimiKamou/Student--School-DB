@@ -32,21 +32,8 @@ END $$;
 
 GRANT USAGE ON SCHEMA app, platform, ref, org, curric, gradebook, analytics, teach TO app_rw, app_ro;
 
-CREATE OR REPLACE FUNCTION app.has_role(p_role text) RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, public AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM platform.user_role ur
-    WHERE ur.tenant_id = app.current_tenant()
-      AND ur.user_id = app.current_user_id()
-      AND ur.role = p_role)
-$$;
-
--- Whole-school readers. DPO is included for subject-access requests and is
--- itself audited via platform.access_log.
-CREATE OR REPLACE FUNCTION app.is_school_wide() RETURNS boolean
-LANGUAGE sql STABLE AS $$
-  SELECT app.has_role('school_admin') OR app.has_role('dpo')
-$$;
+-- app.has_role() and app.is_school_wide() are defined in 001: views created in
+-- earlier migrations already depend on them.
 
 -- The scope predicate. Written once, applied everywhere student data lives.
 CREATE OR REPLACE FUNCTION app.can_see_student(p_student uuid) RETURNS boolean
@@ -192,7 +179,46 @@ GRANT USAGE ON ALL SEQUENCES IN SCHEMA platform, gradebook, org TO app_rw;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA app, gradebook, teach, analytics, ref, curric TO app_rw;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA app TO app_ro;
 
--- Matviews cannot carry RLS. They hold aggregates over student data, so they
--- are NOT granted to app_ro/app_rw directly — the API reads them through
--- SECURITY DEFINER functions that re-apply app.can_see_student. Granting these
--- to the app role would be a scope bypass wearing a materialised view.
+-- ---------------------------------------------------------------------------
+-- VIEWS: security_invoker BEFORE any grant.
+--
+-- A PostgreSQL view runs with the privileges of its OWNER by default. Since
+-- these views are owned by the migration role, granting SELECT on one without
+-- setting security_invoker would let any teacher read every school's rows
+-- through it — RLS on the underlying tables silently bypassed, no error, no
+-- trace. That is a cross-tenant breach hiding inside a convenience view.
+--
+-- security_invoker = true makes the view resolve as the CALLING role, so RLS
+-- applies exactly as it does on the base tables. Set it first, grant second.
+--
+-- Views read inside a SECURITY DEFINER function still resolve as that
+-- function's owner, which is what lets the serving layer in 011 read the
+-- analytics stack and re-apply scope by hand.
+-- ---------------------------------------------------------------------------
+-- Callable, because migrations that run LATER create more views. Every
+-- migration that adds a view must end with SELECT app.secure_all_views();
+-- otherwise that view ships owner-privileged and silently bypasses RLS.
+CREATE OR REPLACE FUNCTION app.secure_all_views() RETURNS integer
+LANGUAGE plpgsql AS $fn$
+DECLARE r record; n integer := 0;
+BEGIN
+  FOR r IN
+    SELECT c.relname, ns.nspname
+    FROM pg_class c JOIN pg_namespace ns ON ns.oid = c.relnamespace
+    WHERE c.relkind = 'v'
+      AND ns.nspname IN ('org','curric','gradebook','analytics','teach','ref','platform')
+  LOOP
+    EXECUTE format('ALTER VIEW %I.%I SET (security_invoker = true)', r.nspname, r.relname);
+    EXECUTE format('GRANT SELECT ON %I.%I TO app_rw, app_ro', r.nspname, r.relname);
+    n := n + 1;
+  END LOOP;
+  RETURN n;
+END $fn$;
+
+SELECT app.secure_all_views();
+
+-- Matviews cannot carry RLS and cannot be security_invoker. They hold
+-- aggregates over student data, so they are NOT granted to app_ro/app_rw at
+-- all — the API reads them through the SECURITY DEFINER functions in 011,
+-- which re-apply app.can_see_student(). Granting these to the app role would
+-- be a scope bypass wearing a materialised view.

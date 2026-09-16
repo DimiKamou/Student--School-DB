@@ -221,6 +221,13 @@ END $$;
 -- teachers keep using. Absence of a result row is ambiguous — it means both
 -- "not marked yet" and "nothing to mark" — so it has to be computed against
 -- the enrolment, not guessed from row counts.
+--
+-- SCOPED TO THE VIEWER'S OWN CLASSES, in the view rather than in one endpoint.
+-- gradebook.assessment carries tenant isolation but no per-teacher RLS policy,
+-- so without this a teacher saw every class in the school here. Worse, RLS on
+-- gradebook.result correctly hid the OTHER class's marks from her, so each of
+-- their fully-marked assessments rendered as "24 of 24 outstanding" — a scope
+-- leak that also manufactured false work. Caught by looking at the screen.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE VIEW teach.v_marking_todo AS
 SELECT
@@ -244,6 +251,11 @@ JOIN org.enrolment e ON e.teaching_group_id = tg.id AND e.to_date IS NULL
 LEFT JOIN gradebook.item it ON it.assessment_id = a.id
 LEFT JOIN gradebook.result r ON r.item_id = it.id AND r.student_id = e.student_id
 WHERE a.deleted_at IS NULL
+  AND (app.is_school_wide() OR EXISTS (
+    SELECT 1 FROM org.teaching_assignment ta
+    JOIN org.person staff ON staff.id = ta.staff_id
+    WHERE ta.teaching_group_id = tg.id AND ta.to_date IS NULL
+      AND staff.user_id = app.current_user_id()))
 GROUP BY a.tenant_id, a.id, a.title, a.occurred_on, tg.id, tg.label, s.name, a.marking_closed_at;
 
 -- ---------------------------------------------------------------------------

@@ -1,0 +1,7 @@
+student_ref,group_code,assessment_title,date,item_label,max_value,raw_value,topic,kind
+S001,11H1,Sources test,2026-01-15,Q1,10,7,Source evaluation,summative
+S002,11H1,Sources test,2026-01-15,Q1,10,4,Source evaluation,summative
+S003,11H1,Sources test,2026-01-15,Q1,10,5,Source evaluation,summative
+S001,11H1,Sources test,2026-01-15,Q2,15,11,Causation,summative
+S002,11H1,Sources test,2026-01-15,Q2,15,12,Causation,summative
+S003,11H1,Sources test,2026-01-15,Q2,15,13,Causation,summative

@@ -229,3 +229,6 @@ GRANT EXECUTE ON FUNCTION
   analytics.attention_list(integer),
   analytics.group_coverage(uuid)
 TO app_rw, app_ro;
+
+-- Re-secure in case this migration introduced or replaced a view.
+SELECT app.secure_all_views();
