@@ -1,7 +1,8 @@
 import Fastify from 'fastify'
 import cookie from '@fastify/cookie'
 import cors from '@fastify/cors'
-import { closeDb } from './db.js'
+import { closeDb, type Session } from './db.js'
+import { loadSession } from './auth.js'
 import { registerAuthRoutes } from './routes/auth.js'
 import { registerTeachingRoutes } from './routes/teaching.js'
 import { registerMarksRoutes } from './routes/marks.js'
@@ -19,6 +20,13 @@ await app.register(cors, {
   credentials: true,
 })
 await app.register(cookie)
+
+// Validate the session ONCE per request and hand it to every handler, so no
+// route can forget to check and no route pays for checking twice.
+app.decorateRequest('session', null)
+app.addHook('preHandler', async (req) => {
+  ;(req as typeof req & { session: Session | null }).session = await loadSession(req)
+})
 
 app.setErrorHandler((err, _req, reply) => {
   const status = (err as { statusCode?: number }).statusCode ?? 500

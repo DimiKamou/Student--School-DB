@@ -114,9 +114,15 @@ DECLARE v uuid;
 BEGIN
   SELECT id INTO v FROM platform.tenant WHERE slug = p_slug;
   IF v IS NULL THEN
-    INSERT INTO platform.tenant (slug, name, country_code, timezone, default_locale, plan)
-    VALUES (p_slug, p_name, p_country, 'Europe/London', 'en', 'standard')
+    -- is_reference = true: this is a DEMO tenant, not a school. Without the
+    -- flag a fresh install ships looking already-configured, and first-run
+    -- setup refuses to run because it sees a tenant already present.
+    INSERT INTO platform.tenant (slug, name, country_code, timezone, default_locale,
+                                 plan, is_reference)
+    VALUES (p_slug, p_name, p_country, 'Europe/London', 'en', 'standard', true)
     RETURNING id INTO v;
+  ELSE
+    UPDATE platform.tenant SET is_reference = true WHERE id = v;
   END IF;
   RETURN v;
 END $fn$;
