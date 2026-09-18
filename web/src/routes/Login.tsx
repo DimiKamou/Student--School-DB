@@ -1,43 +1,76 @@
 import { useEffect, useState } from 'react'
-import { api, type DevUser } from '../lib/api'
+import { Link, useNavigate } from 'react-router-dom'
+import { api } from '../lib/api'
 
-/** Development sign-in. Production swaps this for a magic link or school SSO. */
-export default function Login({ onSignedIn }: { onSignedIn: (me: any) => void }) {
-  const [users, setUsers] = useState<DevUser[]>([])
+export default function Login({ onSignedIn }: { onSignedIn: (me: unknown) => void }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [setupNeeded, setSetupNeeded] = useState(false)
+  const nav = useNavigate()
 
   useEffect(() => {
-    api.get<DevUser[]>('/auth/dev-users').then(setUsers).catch((e) => setErr(e.message))
+    api.get<{ needed: boolean }>('/setup/needed')
+      .then((r) => setSetupNeeded(r.needed))
+      .catch(() => {})
   }, [])
 
-  async function signIn(userId: string) {
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true); setErr(null)
     try {
-      await api.post('/auth/dev-login', { userId })
+      await api.post('/auth/login', { email, password })
       onSignedIn(await api.get('/me'))
-    } catch (e) { setErr((e as Error).message) }
+      nav('/')
+    } catch (e) {
+      setErr((e as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (setupNeeded) {
+    return (
+      <div className="main" style={{ maxWidth: 460, marginTop: 72 }}>
+        <div className="card stack">
+          <h1>No school set up yet</h1>
+          <p className="secondary" style={{ margin: 0 }}>
+            This installation is brand new. Create your school and the first administrator account.
+          </p>
+          <Link className="btn primary" to="/setup"
+                style={{ textAlign: 'center', background: 'var(--series-1)',
+                         borderColor: 'var(--series-1)', color: '#fff' }}>
+            Set up your school
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="main" style={{ maxWidth: 480, marginTop: 64 }}>
-      <div className="card stack">
-        <header><h1>Sign in</h1></header>
-        {err && <p className="err">{err}</p>}
-        <p className="muted" style={{ marginTop: -6 }}>
-          Development sign-in. Pick an account to see what that person is allowed to see —
-          the database enforces it, not the UI.
+    <div className="main" style={{ maxWidth: 420, marginTop: 72 }}>
+      <form className="card stack" onSubmit={submit}>
+        <h1>Sign in</h1>
+        {err && <p className="err" role="alert" style={{ margin: 0 }}>{err}</p>}
+        <label className="stack" style={{ gap: 5 }}>
+          <span className="secondary">Email</span>
+          <input type="email" autoComplete="username" required value={email}
+                 onChange={(e) => setEmail(e.target.value)} autoFocus />
+        </label>
+        <label className="stack" style={{ gap: 5 }}>
+          <span className="secondary">Password</span>
+          <input type="password" autoComplete="current-password" required value={password}
+                 onChange={(e) => setPassword(e.target.value)} />
+        </label>
+        <button className="primary" type="submit" disabled={busy || !email || !password}>
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+        <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+          Accounts are created by invitation from your school administrator. There is no public
+          sign-up — this database holds information about children.
         </p>
-        {users.length === 0 && !err && <p className="muted">No accounts found. Has the database been seeded?</p>}
-        <div className="stack" style={{ gap: 8 }}>
-          {users.map((u) => (
-            <button key={u.user_id} onClick={() => signIn(u.user_id)}
-                    style={{ textAlign: 'left', padding: '10px 13px' }}>
-              <strong>{u.display_name}</strong>
-              <span className="muted"> · {u.roles.filter(Boolean).join(', ') || 'no roles'}</span>
-              <div className="muted" style={{ fontSize: 12 }}>{u.tenant_name}</div>
-            </button>
-          ))}
-        </div>
-      </div>
+      </form>
     </div>
   )
 }

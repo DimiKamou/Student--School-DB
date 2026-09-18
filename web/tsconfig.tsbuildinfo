@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/main.tsx","./src/components/Pill.tsx","./src/components/Sparkline.tsx","./src/lib/api.ts","./src/routes/ClassView.tsx","./src/routes/Entry.tsx","./src/routes/Login.tsx","./src/routes/StudentView.tsx","./src/routes/Today.tsx"],"version":"5.9.3"}
