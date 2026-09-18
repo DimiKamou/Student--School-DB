@@ -61,10 +61,10 @@ export default function StudentView() {
               <thead>
                 <tr>
                   <th>Topic</th><th>Verdict</th>
-                  <th style={{ textAlign: 'right' }}>Their avg</th>
-                  <th style={{ textAlign: 'right' }}>Class avg</th>
-                  <th style={{ textAlign: 'right' }}>vs own baseline</th>
-                  <th style={{ textAlign: 'right' }}>Evidence</th>
+                  <th align="right">Their avg</th>
+                  <th align="right">Class avg</th>
+                  <th align="right">vs baseline</th>
+                  <th align="right">Evidence</th>
                   <th>Context</th>
                 </tr>
               </thead>
@@ -73,19 +73,20 @@ export default function StudentView() {
                   <tr key={g.tag_id + g.teaching_group_id}>
                     <td>{g.tag_label}<div className="muted" style={{ fontSize: 12 }}>{g.group_label}</div></td>
                     <td><Pill value={g.verdict} /></td>
-                    <td className="tabular" style={{ textAlign: 'right' }}>
+                    <td className="num">
                       {g.mean_pct == null ? '—' : `${Math.round(Number(g.mean_pct) * 100)}%`}
                     </td>
-                    <td className="tabular muted" style={{ textAlign: 'right' }}>
+                    <td className="num muted">
                       {g.cohort_mean_pct == null ? '—' : `${Math.round(Number(g.cohort_mean_pct) * 100)}%`}
                     </td>
-                    <td className="tabular" style={{ textAlign: 'right' }}>
+                    <td className="num">
                       {g.mean_residual == null ? '—'
-                        : `${Number(g.mean_residual) > 0 ? '+' : ''}${(Number(g.mean_residual) * 100).toFixed(1)}pp`}
+                        : `${Number(g.mean_residual) > 0 ? '+' : ''}${(Number(g.mean_residual) * 100).toFixed(1)}`}
+                      {g.mean_residual != null && <span className="unit">pp</span>}
                     </td>
-                    <td className="tabular muted" style={{ textAlign: 'right' }}>
-                      {g.n_responses} marks<br />
-                      <span style={{ fontSize: 11 }}>{g.n_assessments} tasks</span>
+                    <td className="num muted">
+                      {g.n_responses}<span className="unit"> marks</span><br />
+                      <span className="unit">{g.n_assessments} tasks</span>
                     </td>
                     <td>
                       {g.time_context === 'under_taught' && <Pill value="under_taught" />}

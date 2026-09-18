@@ -1,0 +1,189 @@
+/* ---------------------------------------------------------------------------
+   Public marketing site.
+
+   Scoped entirely under .pub so nothing here can reach the signed-in app. No
+   colour, radius or font is invented: every value below is a token from
+   src/styles.css (with a fallback to the older token name where one was
+   recently renamed, so this file cannot break the site if the design system
+   moves again) or a geometric one -- spacing, size, weight.
+
+   A marketing page may be louder than the instrument it sells, so the type
+   scale is bigger and the whitespace more generous. It is the same palette,
+   the same near-square corner, the same rules-not-boxes logic, and it has to
+   hold at 400px and in dark mode -- both of which the tokens handle.
+   --------------------------------------------------------------------------- */
+
+.pub {
+  background: var(--page);
+  color: var(--text-primary);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Chrome --------------------------------------------------------------- */
+.pub-bar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 11px 20px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--rule-strong, var(--border));
+}
+.pub-brand {
+  font-weight: 600; letter-spacing: -0.02em; font-size: var(--t-lead, 16px);
+  color: var(--text-primary);
+}
+.pub-brand:hover { text-decoration: none; }
+.pub-nav { display: flex; gap: 16px; flex-wrap: wrap; }
+.pub-nav a,
+.pub-signin { color: var(--text-secondary); font-weight: 500; font-size: var(--t-small, 12.5px); }
+.pub-nav a:hover, .pub-signin:hover { color: var(--text-primary); }
+.pub-nav a.active { color: var(--text-primary); }
+.pub-bar .pub-spacer { margin-left: auto; }
+.pub-bar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* A link that behaves as a button. Same geometry as button/.btn in styles.css. */
+.pub-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font: inherit; font-size: var(--t-small, 12.5px); font-weight: 500;
+  padding: 8px 14px; border-radius: var(--radius);
+  border: 1px solid var(--accent, var(--series-1));
+  background: var(--accent, var(--series-1)); color: #fff;
+  white-space: nowrap;
+}
+.pub-btn:hover { filter: brightness(1.1); text-decoration: none; }
+.pub-btn.ghost {
+  background: var(--surface-1); color: var(--text-primary);
+  border-color: var(--rule-strong, var(--border));
+}
+.pub-btn.ghost:hover { background: var(--surface-2, var(--page)); filter: none; }
+.pub-btn.big { padding: 11px 19px; font-size: var(--t-body, 14px); }
+
+.pub-main { width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 20px; flex: 1; }
+
+/* --- Type ----------------------------------------------------------------- */
+.pub-eyebrow { margin: 0 0 16px; }          /* pairs with the global .eyebrow */
+.pub-h1 {
+  font-size: clamp(30px, 6vw, 50px); line-height: 1.05; letter-spacing: -0.028em;
+  font-weight: 600; margin: 0; max-width: 17ch; text-wrap: balance;
+}
+.pub-h2 {
+  font-size: clamp(21px, 3.4vw, 30px); line-height: 1.14; letter-spacing: -0.022em;
+  font-weight: 600; margin: 0; max-width: 24ch; text-wrap: balance;
+}
+.pub-h3 { font-size: var(--t-h3, 17px); font-weight: 600; letter-spacing: -0.008em; margin: 0; }
+.pub-lede {
+  font-size: clamp(16px, 2.2vw, 19px); line-height: 1.5; color: var(--text-secondary);
+  max-width: 58ch; margin: 18px 0 0;
+}
+.pub-p { max-width: 68ch; margin: 13px 0 0; color: var(--text-secondary); line-height: 1.62; }
+.pub-p strong { color: var(--text-primary); font-weight: 600; }
+.pub-p.tight { margin-top: 5px; }
+
+.pub-code {
+  font-family: var(--font-figure, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.92em; letter-spacing: -0.02em;
+  background: var(--surface-2, color-mix(in srgb, var(--text-muted) 12%, transparent));
+  border-radius: 2px; padding: 1px 5px; color: var(--text-primary);
+}
+.pub-formula {
+  font-family: var(--font-figure, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 12.5px; line-height: 1.8; letter-spacing: -0.02em;
+  background: var(--surface-1);
+  border: 1px solid var(--rule, var(--border)); border-left: 2px solid var(--accent, var(--series-1));
+  border-radius: var(--radius);
+  padding: 13px 16px; margin: 18px 0 0; overflow-x: auto; white-space: pre;
+  color: var(--text-primary); max-width: 100%;
+}
+
+/* --- Layout --------------------------------------------------------------- */
+.pub-hero { padding: clamp(40px, 7vw, 76px) 0 clamp(26px, 4vw, 42px); }
+.pub-section { padding: clamp(34px, 5.5vw, 58px) 0; border-top: 1px solid var(--rule, var(--border)); }
+.pub-section.first { border-top: 0; }
+
+.pub-grid { display: grid; gap: 14px; margin-top: 24px; }
+.pub-grid.two   { grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); }
+.pub-grid.three { grid-template-columns: repeat(auto-fit, minmax(228px, 1fr)); }
+
+/* A sheet, matching .card in styles.css but independent of its internal
+   child-padding model, which a marketing layout does not want. */
+.pub-card {
+  background: var(--surface-1);
+  border: 1px solid var(--rule, var(--border));
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.pub-card.accent { border-color: var(--accent, var(--series-1)); }
+.pub-card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; flex-wrap: wrap; }
+.pub-card .pub-p { font-size: var(--t-small, 13px); max-width: 52ch; }
+
+.pub-callout {
+  border-left: 2px solid var(--accent, var(--series-1));
+  padding: 2px 0 2px 16px; margin: 24px 0 0; max-width: 64ch;
+}
+.pub-callout .pub-p { margin-top: 6px; }
+
+.pub-list { margin: 14px 0 0; padding-left: 20px; max-width: 66ch;
+            color: var(--text-secondary); line-height: 1.62; }
+.pub-list li { margin-bottom: 8px; }
+.pub-list li strong { color: var(--text-primary); font-weight: 600; }
+.pub-list.plain { list-style: none; padding-left: 0; }
+.pub-list.plain li { display: flex; gap: 9px; align-items: flex-start; }
+.pub-list.plain .tick  { color: var(--good); font-size: 11px; line-height: 1.75; flex: none; }
+.pub-list.plain .cross { color: var(--text-muted); font-size: 11px; line-height: 1.75; flex: none; }
+
+.pub-figure { margin: 22px 0 0; }
+.pub-figure svg { display: block; width: 100%; height: auto; }
+.pub-figure figcaption {
+  color: var(--text-muted); font-size: var(--t-small, 12.5px);
+  margin-top: 10px; max-width: 62ch; line-height: 1.5;
+}
+.pub-figure.narrow { max-width: 440px; }
+
+.pub-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+.pub-chip {
+  font-size: var(--t-micro, 11px); font-weight: 500; color: var(--text-secondary);
+  border: 1px solid var(--rule, var(--border)); border-radius: var(--radius);
+  padding: 3px 9px; background: var(--surface-1); white-space: nowrap;
+}
+
+.pub-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 26px; }
+.pub-actions .pub-note { color: var(--text-muted); font-size: var(--t-small, 12.5px); }
+
+/* --- Pricing -------------------------------------------------------------- */
+.pub-tier { display: flex; flex-direction: column; }
+.pub-tier .pub-price {
+  font-size: clamp(19px, 3vw, 23px); font-weight: 600; letter-spacing: -0.02em;
+  color: var(--text-primary); margin-top: 14px;
+}
+.pub-tier .pub-per { color: var(--text-muted); font-size: var(--t-small, 12.5px); }
+.pub-tier ul { margin-top: 14px; }
+.pub-tier .pub-btn { margin-top: 18px; align-self: flex-start; }
+.pub-placeholder {
+  display: inline-flex; align-items: center;
+  font-size: var(--t-micro, 11px); font-weight: 600; letter-spacing: 0.085em;
+  text-transform: uppercase; color: var(--text-secondary);
+  background: var(--surface-2, transparent);
+  border: 1px dashed var(--rule-strong, var(--baseline)); border-radius: 2px;
+  padding: 2px 8px; white-space: nowrap;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+.pub-foot {
+  border-top: 1px solid var(--rule-strong, var(--border)); background: var(--surface-1);
+  margin-top: clamp(32px, 6vw, 64px);
+}
+.pub-foot-inner {
+  max-width: 1000px; margin: 0 auto; padding: 26px 20px 34px;
+  display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start;
+}
+.pub-foot-inner nav { display: flex; gap: 15px; flex-wrap: wrap; }
+.pub-foot-inner .muted { font-size: var(--t-small, 12.5px); max-width: 46ch; line-height: 1.55; }
+
+@media (max-width: 640px) {
+  .pub-bar { padding: 10px 16px; gap: 12px; }
+  .pub-main { padding: 0 16px; }
+  .pub-nav { gap: 14px; }
+  .pub-card { padding: 14px; }
+  .pub-foot-inner { padding: 22px 16px 28px; }
+}

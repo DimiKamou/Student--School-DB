@@ -1,57 +1,131 @@
-/* ---------------------------------------------------------------------------
-   Design tokens. Values are the validated reference palette from the dataviz
-   skill, used unchanged; dark steps are the same hues re-stepped for the dark
-   surface, not an automatic flip.
-   --------------------------------------------------------------------------- */
+/* ===========================================================================
+   THE MARK BOOK
+   ---------------------------------------------------------------------------
+   Design direction: this is a precision instrument, not a dashboard. The
+   products it replaces (SIMS, ManageBac, Bromcom) are cluttered enterprise
+   blue; the thing that distinguishes this one is that it refuses to overclaim.
+   So the interface takes its logic from a teacher's ruled mark book — a fixed
+   column of names, columns of figures, organised by rules rather than by a
+   grid of floating cards — executed with the restraint of a statistical report.
+
+   Three consequences, applied throughout:
+     1. RULES ORGANISE, not borders. A hairline carries structure; a box is
+        spent only where something is genuinely a separate object.
+     2. FIGURES ARE THE CONTENT. Every number is set in IBM Plex Mono,
+        right-aligned, tabular, with its unit de-emphasised. Numbers get the
+        typographic care usually spent on headlines.
+     3. COLOUR IS SEMANTIC ONLY. The accent is for things you can click.
+        Everything that carries meaning uses the status palette, always with a
+        glyph and a word beside it.
+
+   Fonts are self-hosted. Google Fonts would send every teacher's IP to a US
+   server on every page load, which is precisely the kind of thing a school DPO
+   asks about — and a German court has already ruled on.
+   =========================================================================== */
+
+@font-face {
+  font-family: 'Plex Sans';
+  src: url('/fonts/ibm-plex-sans-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 100 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2122, U+2212;
+}
+@font-face {
+  font-family: 'Plex Sans';
+  src: url('/fonts/plex-sans-greek.woff2') format('woff2-variations');
+  font-weight: 100 700;
+  font-display: swap;
+  unicode-range: U+0370-03FF, U+1F00-1FFF;   /* Greek and Greek Extended */
+}
+@font-face {
+  font-family: 'Plex Mono';
+  src: url('/fonts/plex-mono-400.woff2') format('woff2');
+  font-weight: 400; font-display: swap;
+}
+@font-face {
+  font-family: 'Plex Mono';
+  src: url('/fonts/plex-mono-600.woff2') format('woff2');
+  font-weight: 600; font-display: swap;
+}
+
 :root {
   color-scheme: light;
-  --surface-1: #fcfcfb;
-  --page: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --baseline: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.10);
 
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
+  /* --- Neutrals. Warm-biased: paper, not screen grey. ------------------- */
+  --page:           #f7f5f0;
+  --surface-1:      #fdfcfa;
+  --surface-2:      #f2efe8;
+  --text-primary:   #14130f;
+  --text-secondary: #55524a;
+  --text-muted:     #8a867a;
+  --rule:           #e4e0d6;   /* the ruled line: the organising device */
+  --rule-strong:    #c9c4b5;
+  --gridline:       #e4e0d6;
+  --baseline:       #c9c4b5;
+  --border:         rgba(20, 19, 15, 0.12);
 
-  /* Sequential blue, 100 -> 700. Magnitude encoding for the heatmap. */
+  /* --- Accent: interaction only. Never decoration. ---------------------- */
+  --accent:         #1f5fae;
+  --accent-soft:    #e8f0fa;
+  --series-1:       #2a78d6;
+  --series-2:       #eb6834;
+
+  /* --- Sequential ramp (magnitude). One hue, light to dark. ------------- */
   --seq-100: #cde2fb; --seq-200: #9ec5f4; --seq-300: #6da7ec; --seq-400: #3987e5;
   --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
 
-  /* Status: fixed, never themed, never reused as a series colour. */
-  --good: #0ca30c;
-  --warning: #fab219;
-  --serious: #ec835a;
+  /* --- Status: fixed, never themed, never reused as a series colour. ---- */
+  --good:     #0ca30c;
+  --warning:  #fab219;
+  --serious:  #ec835a;
   --critical: #d03b3b;
 
-  --radius: 8px;
-  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* --- Type ------------------------------------------------------------ */
+  --font: 'Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-figure: 'Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --t-micro: 11px;
+  --t-small: 12.5px;
+  --t-body:  14px;
+  --t-lead:  16px;
+  --t-h3:    17px;
+  --t-h2:    21px;
+  --t-h1:    27px;
+  --t-display: 40px;
+
+  --radius: 3px;          /* almost square: an instrument, not a bubble */
+  --radius-pill: 2px;
 }
+
 @media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --surface-1: #1a1a19;
-    --page: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --baseline: #383835;
-    --border: rgba(255, 255, 255, 0.10);
-    --series-1: #3987e5;
-    --series-2: #d95926;
+    --page:           #100f0c;
+    --surface-1:      #191814;
+    --surface-2:      #22201b;
+    --text-primary:   #f6f4ef;
+    --text-secondary: #bdb9ad;
+    --text-muted:     #8a867a;
+    --rule:           #2e2c26;
+    --rule-strong:    #454339;
+    --gridline:       #2e2c26;
+    --baseline:       #454339;
+    --border:         rgba(246, 244, 239, 0.13);
+    --accent:         #6ba6ef;
+    --accent-soft:    #1b2a3d;
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
     --seq-100: #184f95; --seq-200: #1c5cab; --seq-300: #256abf; --seq-400: #2a78d6;
     --seq-500: #3987e5; --seq-600: #5598e7; --seq-700: #86b6ef;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface-1: #1a1a19; --page: #0d0d0d;
-  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
-  --gridline: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+  --page: #100f0c; --surface-1: #191814; --surface-2: #22201b;
+  --text-primary: #f6f4ef; --text-secondary: #bdb9ad; --text-muted: #8a867a;
+  --rule: #2e2c26; --rule-strong: #454339; --gridline: #2e2c26; --baseline: #454339;
+  --border: rgba(246, 244, 239, 0.13);
+  --accent: #6ba6ef; --accent-soft: #1b2a3d;
   --series-1: #3987e5; --series-2: #d95926;
   --seq-100: #184f95; --seq-200: #1c5cab; --seq-300: #256abf; --seq-400: #2a78d6;
   --seq-500: #3987e5; --seq-600: #5598e7; --seq-700: #86b6ef;
@@ -60,111 +134,238 @@
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
 body {
-  margin: 0; font-family: var(--font); font-size: 14px; line-height: 1.5;
-  background: var(--page); color: var(--text-primary);
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--t-body);
+  line-height: 1.5;
+  background: var(--page);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-a { color: var(--series-1); text-decoration: none; }
-a:hover { text-decoration: underline; }
-h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
-h1 { font-size: 20px; } h2 { font-size: 16px; } h3 { font-size: 14px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+h1, h2, h3 { margin: 0; font-weight: 600; text-wrap: balance; }
+h1 { font-size: var(--t-h1); letter-spacing: -0.021em; line-height: 1.16; }
+h2 { font-size: var(--t-h2); letter-spacing: -0.014em; line-height: 1.22; }
+h3 { font-size: var(--t-h3); letter-spacing: -0.008em; }
+
+/* The ledger column-head: small, spaced capitals sitting on a rule. Used for
+   section labels and table headers so both read as the same kind of thing. */
+.eyebrow, th {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
 
 .app { display: flex; flex-direction: column; min-height: 100%; }
+
 .topbar {
-  display: flex; align-items: center; gap: 20px; padding: 10px 20px;
-  background: var(--surface-1); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 10; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 22px;
+  padding: 0 20px; min-height: 52px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--rule-strong);
+  position: sticky; top: 0; z-index: 20; flex-wrap: wrap;
 }
-.topbar .brand { font-weight: 650; letter-spacing: -0.02em; }
-.topbar nav { display: flex; gap: 14px; }
-.topbar nav a { color: var(--text-secondary); font-weight: 500; }
-.topbar nav a.active { color: var(--text-primary); }
+.topbar .brand {
+  font-weight: 600; letter-spacing: -0.02em; font-size: var(--t-lead);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+/* The brand mark is three ruled columns: the mark book, reduced to a glyph. */
+.topbar .brand::before {
+  content: ''; width: 13px; height: 15px; flex: none;
+  background:
+    linear-gradient(var(--accent), var(--accent)) 0 0 / 2px 100% no-repeat,
+    linear-gradient(var(--text-muted), var(--text-muted)) 5px 0 / 1px 100% no-repeat,
+    linear-gradient(var(--text-muted), var(--text-muted)) 9px 0 / 1px 100% no-repeat;
+}
+.topbar nav { display: flex; gap: 2px; align-items: stretch; align-self: stretch; }
+.topbar nav a {
+  color: var(--text-secondary); font-weight: 500; font-size: var(--t-small);
+  display: flex; align-items: center; padding: 0 10px;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.topbar nav a:hover { color: var(--text-primary); text-decoration: none; }
+.topbar nav a.active { color: var(--text-primary); border-bottom-color: var(--accent); }
 .topbar .spacer { margin-left: auto; }
-.main { padding: 20px; max-width: 1200px; width: 100%; margin: 0 auto; }
-.stack { display: flex; flex-direction: column; gap: 16px; }
+
+.main { padding: 22px 20px 64px; max-width: 1180px; width: 100%; margin: 0 auto; }
+.stack { display: flex; flex-direction: column; gap: 18px; }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
+/* --- The sheet -------------------------------------------------------------
+   Deliberately not a floating card: a hairline, a near-square corner, and a
+   ruled header. A grid of identical rounded shadowed boxes flattens hierarchy
+   and is the single most templated thing a UI can do.
+   ------------------------------------------------------------------------- */
 .card {
-  background: var(--surface-1); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 0;
 }
-.card > header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
-.card > header .sub { color: var(--text-muted); font-size: 12px; }
+.card > * { padding-inline: 18px; }
+.card > :first-child { padding-top: 16px; }
+.card > :last-child { padding-bottom: 16px; }
+.card > header {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding-block: 14px 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 14px;
+}
+.card > header + * { padding-top: 0; }
+.card > header .sub { color: var(--text-muted); font-size: var(--t-small); }
+/* Tables run full-bleed inside a sheet: the rules should reach its edges, the
+   way ruled lines reach the edge of a page. */
+.card > .scroll-x, .card > table { padding-inline: 0; }
+.card > .scroll-x th:first-child, .card > table th:first-child,
+.card > .scroll-x td:first-child, .card > table td:first-child { padding-left: 18px; }
+.card > .scroll-x th:last-child, .card > table th:last-child,
+.card > .scroll-x td:last-child, .card > table td:last-child { padding-right: 18px; }
 
 .muted { color: var(--text-muted); }
 .secondary { color: var(--text-secondary); }
-.tabular { font-variant-numeric: tabular-nums; }
 
+/* Every figure is mono, tabular and slightly tightened. This is the mark book. */
+.tabular, .figure {
+  font-family: var(--font-figure);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* --- Controls ------------------------------------------------------------ */
 button, .btn {
-  font: inherit; padding: 7px 13px; border-radius: 6px; cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface-1);
-  color: var(--text-primary);
+  font: inherit; font-size: var(--t-small); font-weight: 500;
+  padding: 7px 13px; border-radius: var(--radius); cursor: pointer;
+  border: 1px solid var(--rule-strong); background: var(--surface-1);
+  color: var(--text-primary); transition: background 90ms ease, border-color 90ms ease;
 }
-button:hover { border-color: var(--baseline); }
-button.primary { background: var(--series-1); border-color: var(--series-1); color: #fff; }
-button.primary:hover { filter: brightness(1.06); }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
-input, select {
-  font: inherit; padding: 6px 9px; border-radius: 6px;
-  border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
+button:hover, .btn:hover { background: var(--surface-2); text-decoration: none; }
+button.primary, .btn.primary {
+  background: var(--accent); border-color: var(--accent); color: #fff;
 }
+button.primary:hover, .btn.primary:hover { filter: brightness(1.1); background: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.ghost { border-color: transparent; background: transparent; color: var(--text-secondary); }
+button.ghost:hover { background: var(--surface-2); color: var(--text-primary); }
 
+input, select, textarea {
+  font: inherit; font-size: var(--t-body);
+  padding: 7px 9px; border-radius: var(--radius);
+  border: 1px solid var(--rule-strong); background: var(--surface-1);
+  color: var(--text-primary); max-width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+label { font-size: var(--t-small); }
+textarea { font-family: var(--font); line-height: 1.55; resize: vertical; }
+
+/* --- Tables: the ledger -------------------------------------------------- */
 table { border-collapse: collapse; width: 100%; }
-th { text-align: left; font-weight: 600; font-size: 12px; color: var(--text-muted);
-     padding: 6px 10px; border-bottom: 1px solid var(--gridline); white-space: nowrap; }
-td { padding: 7px 10px; border-bottom: 1px solid var(--gridline); }
-tbody tr:hover { background: color-mix(in srgb, var(--series-1) 5%, transparent); }
-.scroll-x { overflow-x: auto; }
+.scroll-x > table { min-width: max-content; }
+th {
+  text-align: left; padding: 9px 12px 7px;
+  border-bottom: 1px solid var(--rule-strong); white-space: nowrap;
+}
+td { padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--surface-2); }
+/* Numeric columns line up on the right and wear the figure face. */
+th[align="right"], td[align="right"], .num { text-align: right; }
+.num {
+  font-family: var(--font-figure); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.unit { color: var(--text-muted); font-size: 0.86em; }
+/* min-width:0 is what actually makes this clip. Without it a flex or grid child
+   refuses to shrink below its content, the table wins, and the page scrolls
+   sideways -- which is how a "responsive" layout is usually broken. */
+.scroll-x { overflow-x: auto; max-width: 100%; min-width: 0; }
+.card { overflow: hidden; }
+.card > * { min-width: 0; }
 
-/* Status pills always pair the colour with a glyph and a word: a status colour
-   never carries meaning alone. */
+/* --- Status pills --------------------------------------------------------
+   A status colour NEVER carries meaning alone: every pill pairs it with a
+   glyph and a word, so it survives colour-blindness, greyscale printing and
+   forced-colors mode.
+   ------------------------------------------------------------------------- */
 .pill {
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 550;
+  padding: 2px 7px; border-radius: var(--radius-pill);
+  font-size: var(--t-micro); font-weight: 600; letter-spacing: 0.02em;
   border: 1px solid transparent; white-space: nowrap;
 }
-.pill .glyph { font-size: 11px; }
-.pill.good     { color: var(--good);     background: color-mix(in srgb, var(--good) 12%, transparent);     border-color: color-mix(in srgb, var(--good) 35%, transparent); }
-.pill.warning  { color: #8a5d00;         background: color-mix(in srgb, var(--warning) 20%, transparent);  border-color: color-mix(in srgb, var(--warning) 45%, transparent); }
-.pill.serious  { color: #9c4a24;         background: color-mix(in srgb, var(--serious) 18%, transparent);  border-color: color-mix(in srgb, var(--serious) 40%, transparent); }
-.pill.critical { color: var(--critical); background: color-mix(in srgb, var(--critical) 12%, transparent); border-color: color-mix(in srgb, var(--critical) 35%, transparent); }
-.pill.neutral  { color: var(--text-secondary); background: color-mix(in srgb, var(--text-muted) 12%, transparent); border-color: var(--border); }
+.pill .glyph { font-size: 10px; line-height: 1; }
+.pill.good     { color: #0a7d0a; background: color-mix(in srgb, var(--good) 13%, transparent);     border-color: color-mix(in srgb, var(--good) 38%, transparent); }
+.pill.warning  { color: #7d5300; background: color-mix(in srgb, var(--warning) 22%, transparent);  border-color: color-mix(in srgb, var(--warning) 48%, transparent); }
+.pill.serious  { color: #8f4220; background: color-mix(in srgb, var(--serious) 20%, transparent);  border-color: color-mix(in srgb, var(--serious) 44%, transparent); }
+.pill.critical { color: #b32f2f; background: color-mix(in srgb, var(--critical) 13%, transparent); border-color: color-mix(in srgb, var(--critical) 38%, transparent); }
+.pill.neutral  { color: var(--text-secondary); background: var(--surface-2); border-color: var(--rule); }
 @media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) .pill.warning { color: #f5c556; }
-  :root:where(:not([data-theme="light"])) .pill.serious { color: #f0a483; }
+  :root:not([data-theme="light"]) .pill.good    { color: #5fd05f; }
+  :root:not([data-theme="light"]) .pill.warning { color: #f5c556; }
+  :root:not([data-theme="light"]) .pill.serious { color: #f0a483; }
+  :root:not([data-theme="light"]) .pill.critical{ color: #f08080; }
 }
+:root[data-theme="dark"] .pill.good    { color: #5fd05f; }
+:root[data-theme="dark"] .pill.warning { color: #f5c556; }
+:root[data-theme="dark"] .pill.serious { color: #f0a483; }
+:root[data-theme="dark"] .pill.critical{ color: #f08080; }
+
+/* A finding carries a severity stripe as well as a pill: state encoded in form,
+   not only in colour, so the shape of the list is readable at a glance. */
+.finding { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;
+           padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.finding > * { min-width: 0; }
+.finding:last-child { border-bottom: 0; }
+.finding.systemic   { box-shadow: inset 3px 0 0 var(--critical); padding-left: 13px; }
+.finding.individual { box-shadow: inset 3px 0 0 var(--warning);  padding-left: 13px; }
+.finding.declining  { box-shadow: inset 3px 0 0 var(--warning);  padding-left: 13px; }
 
 /* --- Entry grid: the screen the whole product rests on ------------------- */
-.grid-wrap { overflow: auto; max-height: 68vh; border: 1px solid var(--border); border-radius: var(--radius); }
+.grid-wrap {
+  overflow: auto; max-height: 68vh;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--surface-1);
+}
 table.entry { border-collapse: separate; border-spacing: 0; }
-table.entry th, table.entry td { border-bottom: 1px solid var(--gridline); }
+table.entry th, table.entry td { border-bottom: 1px solid var(--rule); }
 table.entry thead th {
   position: sticky; top: 0; z-index: 3; background: var(--surface-1);
-  box-shadow: inset 0 -1px 0 var(--gridline);
+  box-shadow: inset 0 -1px 0 var(--rule-strong);
 }
 table.entry .namecol {
   position: sticky; left: 0; z-index: 2; background: var(--surface-1);
-  min-width: 190px; box-shadow: inset -1px 0 0 var(--gridline);
+  min-width: 190px; box-shadow: inset -1px 0 0 var(--rule-strong);
+  font-size: var(--t-small);
 }
 table.entry thead .namecol { z-index: 4; }
 table.entry td.cell { padding: 0; }
 table.entry input.mark {
-  width: 74px; border: 0; background: transparent; padding: 8px 10px;
-  text-align: right; font-variant-numeric: tabular-nums; border-radius: 0;
+  width: 76px; border: 0; background: transparent; padding: 8px 12px;
+  text-align: right; border-radius: 0;
+  font-family: var(--font-figure); font-variant-numeric: tabular-nums;
 }
 table.entry input.mark:focus {
-  outline: 2px solid var(--series-1); outline-offset: -2px;
-  background: color-mix(in srgb, var(--series-1) 7%, transparent);
+  outline: 2px solid var(--accent); outline-offset: -2px;
+  background: var(--accent-soft);
 }
 table.entry input.mark.over { color: var(--critical); font-weight: 600; }
-table.entry tr.absent .namecol { opacity: 0.55; }
-.saved-flash { color: var(--good); font-size: 12px; }
+table.entry tr.absent .namecol { opacity: 0.5; }
+.saved-flash { color: var(--good); font-size: var(--t-small); font-weight: 500; }
 
 /* --- Charts -------------------------------------------------------------- */
 .chart { width: 100%; display: block; }
 .chart .grid-line { stroke: var(--gridline); stroke-width: 1; }
 .chart .axis-line { stroke: var(--baseline); stroke-width: 1; }
-.chart .axis-text { fill: var(--text-muted); font-size: 11px; }
+.chart .axis-text {
+  fill: var(--text-muted); font-size: 10.5px;
+  font-family: var(--font-figure); letter-spacing: -0.02em;
+}
 .chart .series-line { fill: none; stroke: var(--series-1); stroke-width: 2;
                       stroke-linejoin: round; stroke-linecap: round; }
 .chart .dot { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; }
@@ -173,23 +374,53 @@ table.entry tr.absent .namecol { opacity: 0.55; }
 
 .tooltip {
   position: fixed; pointer-events: none; z-index: 50;
-  background: var(--surface-1); border: 1px solid var(--border);
-  border-radius: 6px; padding: 7px 10px; font-size: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.13); max-width: 260px;
+  background: var(--surface-1); border: 1px solid var(--rule-strong);
+  border-radius: var(--radius); padding: 8px 11px; font-size: var(--t-small);
+  box-shadow: 0 8px 24px rgba(20, 19, 15, 0.16); max-width: 260px;
 }
 .tooltip .t-title { font-weight: 600; margin-bottom: 2px; }
 
-.heat-cell { border-radius: 4px; padding: 4px 8px; display: inline-block;
-             min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
-
-.empty { padding: 28px; text-align: center; color: var(--text-muted); }
-.err { color: var(--critical); }
-.kbd {
-  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
-  border: 1px solid var(--border); border-bottom-width: 2px;
-  border-radius: 4px; padding: 1px 5px; color: var(--text-secondary);
+.heat-cell {
+  border-radius: 2px; padding: 3px 8px; display: inline-block;
+  min-width: 54px; text-align: right;
+  font-family: var(--font-figure); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em; font-size: var(--t-small);
 }
+
+/* --- Utility ------------------------------------------------------------- */
+.empty {
+  padding: 34px 18px; text-align: center; color: var(--text-muted);
+  font-size: var(--t-small);
+}
+.err { color: var(--critical); font-size: var(--t-small); }
+.kbd {
+  font-family: var(--font-figure); font-size: 10.5px;
+  border: 1px solid var(--rule-strong); border-bottom-width: 2px;
+  border-radius: 3px; padding: 1px 5px; color: var(--text-secondary);
+  background: var(--surface-1);
+}
+.note {
+  border-left: 2px solid var(--rule-strong);
+  padding: 2px 0 2px 12px; color: var(--text-secondary); font-size: var(--t-small);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
 @media (max-width: 640px) {
-  .main { padding: 12px; }
-  .topbar { padding: 10px 12px; gap: 12px; }
+  :root { --t-h1: 23px; --t-display: 30px; }
+  .main { padding: 16px 16px 48px; }
+  .topbar { padding: 0 16px; gap: 14px; }
+  .topbar nav { order: 3; width: 100%; overflow-x: auto; }
+  .card > * { padding-inline: 14px; }
+  .card > .scroll-x th:first-child, .card > table th:first-child,
+  .card > .scroll-x td:first-child, .card > table td:first-child { padding-left: 14px; }
+}
+
+@media print {
+  .topbar, button, .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .card { border: 0; }
+  .main { max-width: none; padding: 0; }
 }

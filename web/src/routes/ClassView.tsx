@@ -3,11 +3,20 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { api, type Group, type HeatCell, type Student } from '../lib/api'
 import { Pill } from '../components/Pill'
 
-/** Sequential blue ramp: one hue, light -> dark, magnitude only. Never a rainbow. */
+/**
+ * Sequential blue ramp: one hue, light -> dark, magnitude only. Never a rainbow.
+ *
+ * Mapped over 0.30-0.90 rather than 0-1. Class means in real school data almost
+ * never leave that band, so a raw 0-1 domain spends most of the ramp on values
+ * that never occur and renders every topic the same shade -- the difference
+ * between 40% and 66% is the whole point of this table.
+ */
 const RAMP = ['--seq-100','--seq-200','--seq-300','--seq-400','--seq-500','--seq-600','--seq-700']
+const LO = 0.30, HI = 0.90
 function rampFor(pct: number | null) {
   if (pct == null) return { background: 'transparent', color: 'var(--text-muted)' }
-  const i = Math.min(RAMP.length - 1, Math.max(0, Math.round(pct * (RAMP.length - 1))))
+  const t = Math.min(1, Math.max(0, (pct - LO) / (HI - LO)))
+  const i = Math.min(RAMP.length - 1, Math.max(0, Math.round(t * (RAMP.length - 1))))
   return {
     background: `var(${RAMP[i]})`,
     // Keep text legible as the fill darkens; ink never wears the series colour.
@@ -63,7 +72,7 @@ export default function ClassView() {
                     <td><Link to={`/classes/${g.id}`}>{g.label}</Link></td>
                     <td>{g.subject_name}</td>
                     <td className="secondary">{g.year_level ?? '—'}</td>
-                    <td className="tabular">{g.n_students}</td>
+                    <td className="num">{g.n_students}</td>
                     <td className="muted">{g.framework ?? 'none — marks still work'}</td>
                   </tr>
                 ))}
@@ -91,10 +100,10 @@ export default function ClassView() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Topic</th><th style={{ textAlign: 'right' }}>Class avg</th>
+                      <th>Topic</th><th align="right">Class avg</th>
                       <th>Verdict</th><th>Teaching time</th>
-                      <th style={{ textAlign: 'right' }}>Students behind</th>
-                      <th style={{ textAlign: 'right' }}>Marks</th>
+                      <th align="right">Behind</th>
+                      <th align="right">Marks</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -103,7 +112,7 @@ export default function ClassView() {
                       return (
                         <tr key={h.tag_id}>
                           <td>{h.tag_label}</td>
-                          <td style={{ textAlign: 'right' }}>
+                          <td align="right">
                             {/* Direct label on every cell: the fill is never the only channel. */}
                             <span className="heat-cell" style={rampFor(pct)}>
                               {pct == null ? '—' : `${Math.round(pct * 100)}%`}
@@ -113,10 +122,10 @@ export default function ClassView() {
                           <td>
                             {h.delivery_ratio == null ? <Pill value="time_not_recorded" />
                               : Number(h.delivery_ratio) < 0.6 ? <Pill value="under_taught" />
-                              : <span className="muted tabular">{h.lessons_delivered} lessons</span>}
+                              : <span className="muted"><span className="num">{h.lessons_delivered}</span> lessons</span>}
                           </td>
-                          <td className="tabular" style={{ textAlign: 'right' }}>{h.n_students_below}</td>
-                          <td className="tabular muted" style={{ textAlign: 'right' }}>{h.n_responses}</td>
+                          <td className="num">{h.n_students_below}</td>
+                          <td className="num muted">{h.n_responses}</td>
                         </tr>
                       )
                     })}
