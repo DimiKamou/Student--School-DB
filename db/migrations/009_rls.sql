@@ -195,13 +195,82 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA app TO app_ro;
 -- function's owner, which is what lets the serving layer in 011 read the
 -- analytics stack and re-apply scope by hand.
 -- ---------------------------------------------------------------------------
--- Callable, because migrations that run LATER create more views. Every
--- migration that adds a view must end with SELECT app.secure_all_views();
--- otherwise that view ships owner-privileged and silently bypasses RLS.
+-- Callable and idempotent, because migrations that run LATER create more
+-- tables and views. Every migration that adds either MUST end with
+--     SELECT app.secure_all_views();
+-- otherwise the new object ships ungranted (a 500 the first time anyone uses
+-- it) or, worse, owner-privileged and silently bypassing RLS.
+--
+-- The name is kept for compatibility with migrations that already call it; it
+-- secures tables as well, which is what platform.invite needed.
 CREATE OR REPLACE FUNCTION app.secure_all_views() RETURNS integer
 LANGUAGE plpgsql AS $fn$
 DECLARE r record; n integer := 0;
 BEGIN
+  -- 1. Tenant-scoped tables: RLS on, isolation policy, grants.
+  FOR r IN
+    SELECT c.relname, ns.nspname
+    FROM pg_class c
+    JOIN pg_namespace ns ON ns.oid = c.relnamespace
+    JOIN pg_attribute a ON a.attrelid = c.oid AND a.attname = 'tenant_id' AND a.attnum > 0
+    WHERE c.relkind = 'r'
+      AND ns.nspname IN ('org','curric','gradebook','analytics','teach','platform')
+  LOOP
+    EXECUTE format('ALTER TABLE %I.%I ENABLE ROW LEVEL SECURITY', r.nspname, r.relname);
+    EXECUTE format('ALTER TABLE %I.%I FORCE ROW LEVEL SECURITY', r.nspname, r.relname);
+    IF NOT EXISTS (SELECT 1 FROM pg_policy pol
+                   JOIN pg_class pc ON pc.oid = pol.polrelid
+                   JOIN pg_namespace pn ON pn.oid = pc.relnamespace
+                   WHERE pn.nspname = r.nspname AND pc.relname = r.relname
+                     AND pol.polname = 'tenant_isolation') THEN
+      EXECUTE format($f$
+        CREATE POLICY tenant_isolation ON %I.%I
+        USING (tenant_id = app.current_tenant())
+        WITH CHECK (tenant_id = app.current_tenant())$f$, r.nspname, r.relname);
+    END IF;
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON %I.%I TO app_rw', r.nspname, r.relname);
+    EXECUTE format('GRANT SELECT ON %I.%I TO app_ro', r.nspname, r.relname);
+    n := n + 1;
+  END LOOP;
+
+  -- 2. Reference tables owned either globally or by one school.
+  FOR r IN
+    SELECT c.relname, ns.nspname
+    FROM pg_class c
+    JOIN pg_namespace ns ON ns.oid = c.relnamespace
+    JOIN pg_attribute a ON a.attrelid = c.oid AND a.attname = 'owner_tenant_id' AND a.attnum > 0
+    WHERE c.relkind = 'r' AND ns.nspname IN ('ref','curric')
+  LOOP
+    EXECUTE format('ALTER TABLE %I.%I ENABLE ROW LEVEL SECURITY', r.nspname, r.relname);
+    IF NOT EXISTS (SELECT 1 FROM pg_policy pol
+                   JOIN pg_class pc ON pc.oid = pol.polrelid
+                   JOIN pg_namespace pn ON pn.oid = pc.relnamespace
+                   WHERE pn.nspname = r.nspname AND pc.relname = r.relname
+                     AND pol.polname = 'ref_visibility') THEN
+      EXECUTE format($f$
+        CREATE POLICY ref_visibility ON %I.%I
+        USING (owner_tenant_id = app.global_tenant() OR owner_tenant_id = app.current_tenant())
+        WITH CHECK (owner_tenant_id = app.current_tenant())$f$, r.nspname, r.relname);
+    END IF;
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON %I.%I TO app_rw', r.nspname, r.relname);
+    EXECUTE format('GRANT SELECT ON %I.%I TO app_ro', r.nspname, r.relname);
+    n := n + 1;
+  END LOOP;
+
+  -- 3. Framework config with no owner column: readable by everyone.
+  FOR r IN
+    SELECT c.relname, ns.nspname FROM pg_class c
+    JOIN pg_namespace ns ON ns.oid = c.relnamespace
+    WHERE c.relkind = 'r' AND ns.nspname IN ('ref','curric')
+      AND NOT EXISTS (SELECT 1 FROM pg_attribute a
+                      WHERE a.attrelid = c.oid AND a.attname IN ('owner_tenant_id','tenant_id')
+                        AND a.attnum > 0)
+  LOOP
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON %I.%I TO app_rw', r.nspname, r.relname);
+    EXECUTE format('GRANT SELECT ON %I.%I TO app_ro', r.nspname, r.relname);
+  END LOOP;
+
+  -- 4. Views: security_invoker BEFORE the grant, always.
   FOR r IN
     SELECT c.relname, ns.nspname
     FROM pg_class c JOIN pg_namespace ns ON ns.oid = c.relnamespace
@@ -212,6 +281,17 @@ BEGIN
     EXECUTE format('GRANT SELECT ON %I.%I TO app_rw, app_ro', r.nspname, r.relname);
     n := n + 1;
   END LOOP;
+
+  -- 5. Sequences behind any newly granted table.
+  FOR r IN
+    SELECT c.relname, ns.nspname FROM pg_class c
+    JOIN pg_namespace ns ON ns.oid = c.relnamespace
+    WHERE c.relkind = 'S'
+      AND ns.nspname IN ('org','curric','gradebook','analytics','teach','platform')
+  LOOP
+    EXECUTE format('GRANT USAGE, SELECT ON SEQUENCE %I.%I TO app_rw', r.nspname, r.relname);
+  END LOOP;
+
   RETURN n;
 END $fn$;
 

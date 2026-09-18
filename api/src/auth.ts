@@ -123,6 +123,10 @@ export function requireSession(req: FastifyRequest): Session {
   return s
 }
 
+/** Roles that operate the school-facing app. A student or guardian is not staff. */
+export const STAFF_ROLES = ['school_admin', 'head_of_dept', 'teacher', 'tutor', 'dpo']
+export const isStaff = (roles: string[]) => roles.some((r) => STAFF_ROLES.includes(r))
+
 export function requireRole(req: FastifyRequest, ...roles: string[]): Session {
   const s = requireSession(req)
   if (!roles.some((r) => s.roles.includes(r))) {

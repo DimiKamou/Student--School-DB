@@ -1,0 +1,120 @@
+/* ===========================================================================
+   Reports, comment bank and parents' evening.
+
+   Component-scoped additions only. Every colour, size and rule here comes from
+   a token in styles.css — nothing new is invented, because a second palette is
+   how a design system stops being one.
+
+   The print block at the bottom is load-bearing: a parents' evening sheet that
+   prints with a navigation bar across the top is a sheet a teacher photographs
+   on their phone instead, and then the data never gets used in the room.
+   =========================================================================== */
+
+/* --- Report writing: evidence beside the box, never instead of it ---------
+   Two columns on a desk, stacked on a phone. minmax(0, …) is what lets the
+   evidence table scroll inside its column instead of widening the page.
+   ------------------------------------------------------------------------- */
+.rep-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .rep-split { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+}
+
+/* One student in the pass. A rule separates them; a box would make twenty-four
+   identical cards and flatten the list into wallpaper. */
+.rep-student {
+  padding-block: 16px;
+  border-top: 1px solid var(--rule);
+}
+.rep-student:first-of-type { border-top: 0; padding-top: 4px; }
+
+.rep-name { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.rep-name h3 { font-size: var(--t-h3); }
+
+.rep-box { display: flex; flex-direction: column; gap: 8px; }
+.rep-box textarea { width: 100%; min-height: 132px; }
+
+.rep-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rep-toolbar select { max-width: 100%; flex: 1 1 200px; min-width: 0; }
+
+/* A progress meter, not a chart: one bar, one hue, a written figure beside it. */
+.rep-meter {
+  height: 6px; border-radius: 3px; background: var(--surface-2);
+  overflow: hidden; min-width: 120px; flex: 1 1 160px;
+}
+.rep-meter > span { display: block; height: 100%; background: var(--accent); }
+
+/* --- Placeholders --------------------------------------------------------- */
+.ph {
+  font-family: var(--font-figure); font-size: var(--t-micro);
+  border: 1px solid var(--rule-strong); border-radius: var(--radius);
+  padding: 1px 5px; color: var(--text-secondary); background: var(--surface-2);
+  cursor: pointer;
+}
+.ph:hover { color: var(--text-primary); border-color: var(--accent); }
+
+.bank-body {
+  font-size: var(--t-small); line-height: 1.5; color: var(--text-primary);
+  max-width: 62ch;
+}
+
+/* --- Parents' evening prep sheet ------------------------------------------ */
+.prep-sheet { break-inside: avoid; page-break-inside: avoid; }
+.prep-head {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule-strong); padding-bottom: 8px; margin-bottom: 12px;
+}
+.prep-cols {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px;
+}
+.prep-cols h4 {
+  margin: 0 0 6px; font-size: var(--t-micro); font-weight: 600;
+  letter-spacing: 0.085em; text-transform: uppercase; color: var(--text-muted);
+}
+.prep-list { margin: 0; padding-left: 16px; font-size: var(--t-small); line-height: 1.6; }
+.prep-list li { margin-bottom: 4px; }
+
+/* Blank space that is actually usable: ruled lines a teacher writes on in the
+   five minutes between appointments. */
+.note-lines {
+  margin-top: 10px;
+  height: 108px;
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0 25px, var(--rule) 25px 26px);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* --- Print ----------------------------------------------------------------
+   styles.css already drops .topbar, buttons and .no-print. This adds what is
+   specific to these sheets: one student per page, no interface furniture, and
+   ink that does not rely on a background the printer will not lay down.
+   ------------------------------------------------------------------------- */
+@media print {
+  .topbar, nav, select, input, button, .no-print { display: none !important; }
+  .app, .main, .stack { display: block !important; }
+  .card { border: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .card > * { padding-inline: 0 !important; }
+  .card > header { border-bottom: 1px solid #999; }
+
+  .prep-sheet {
+    page-break-after: always; break-after: page;
+    padding: 0 0 12px; border: 0;
+  }
+  .prep-sheet:last-child { page-break-after: auto; break-after: auto; }
+  .prep-head { border-bottom: 1px solid #000; }
+  .note-lines {
+    height: 150px;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent 0 28px, #bbb 28px 29px);
+    border-bottom: 1px solid #bbb;
+  }
+  /* A pill must survive a mono laser printer, so it keeps its glyph and word
+     and loses only the tint. */
+  .pill { border: 1px solid #999 !important; background: transparent !important; color: #000 !important; }
+  a { color: #000; text-decoration: none; }
+  @page { margin: 14mm; }
+}

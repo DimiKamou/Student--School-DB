@@ -230,9 +230,14 @@ export async function registerBlueprintRoutes(app: FastifyInstance) {
     })
   })
 
-  /** Replace a blueprint wholesale. Items are replaced, never merged: a partial
-   *  update would leave a paper half last year's and half this year's. */
-  app.put('/blueprints/:id', async (req) => {
+  /**
+   * Replace a blueprint wholesale. Items are replaced, never merged: a partial
+   * update would leave a paper half last year's and half this year's.
+   *
+   * POST rather than PUT, and /delete rather than DELETE, to match the verbs
+   * the rest of this API and the web client already speak.
+   */
+  app.post('/blueprints/:id', async (req) => {
     const s = requireSession(req)
     const { id } = uuidParam.parse(req.params)
     const body = blueprintBody.parse(req.body)
@@ -260,7 +265,7 @@ export async function registerBlueprintRoutes(app: FastifyInstance) {
     })
   })
 
-  app.delete('/blueprints/:id', async (req) => {
+  app.post('/blueprints/:id/delete', async (req) => {
     const s = requireSession(req)
     const { id } = uuidParam.parse(req.params)
     return withTenant(s, async (tx) => {

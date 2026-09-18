@@ -1,0 +1,91 @@
+/* ===========================================================================
+   Student and guardian portal.
+   ---------------------------------------------------------------------------
+   Everything here is built from the tokens in styles.css. No new colours: the
+   portal borrows the sequential ramp for the one bar it draws, and otherwise
+   uses rules and type, like the rest of the instrument.
+
+   The visual register is deliberately quieter than the teacher screens. A
+   teacher's dashboard is allowed to shout "whole class below benchmark" at
+   them; a 14-year-old's own page is not. Status colour appears here in exactly
+   one place -- a met target -- and even there it carries a glyph and a word.
+   =========================================================================== */
+
+.portal-lede {
+  color: var(--text-secondary);
+  font-size: var(--t-lead);
+  line-height: 1.5;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+/* The action list. A rule between items, no bullets, no severity stripe:
+   a stripe encodes "how bad is this", which is not what this list is. */
+.portal-actions { list-style: none; margin: 0; padding: 0; }
+.portal-actions li {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.portal-actions li:last-child { border-bottom: 0; }
+.portal-action-text { line-height: 1.45; text-wrap: pretty; }
+.portal-action-meta {
+  margin-top: 3px;
+  font-size: var(--t-small);
+  color: var(--text-muted);
+}
+
+/* One subject, one chart. Never two subjects on one pair of axes: the scales
+   are not the same standard and the comparison would be arithmetic fiction. */
+.portal-subject + .portal-subject { margin-top: 18px; }
+.portal-subject-head {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.portal-subject-head h3 { font-size: var(--t-h3); }
+
+/* --- Target progress -------------------------------------------------------
+   A single track: where you are, with the target marked on it. One axis, one
+   quantity, both ends labelled in words as well as position.
+   ------------------------------------------------------------------------- */
+.portal-target + .portal-target {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule);
+}
+.portal-target-row {
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.portal-figure {
+  font-family: var(--font-figure); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em; font-size: var(--t-h2); font-weight: 600;
+}
+.portal-track {
+  position: relative;
+  height: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.portal-track-fill {
+  position: absolute; inset-block: 0; left: 0;
+  background: var(--seq-300);
+}
+/* The target is a rule across the track, not a second colour: a hairline reads
+   as "the line you are aiming at" without competing with the fill. */
+.portal-track-target {
+  position: absolute; inset-block: -3px; width: 2px;
+  background: var(--text-primary);
+}
+.portal-track-legend {
+  display: flex; justify-content: space-between; gap: 12px;
+  margin-top: 5px; font-size: var(--t-small); color: var(--text-muted);
+}
+
+/* The child picker sits with the heading, not in a toolbar of its own. */
+.portal-switcher { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.portal-switcher label { color: var(--text-muted); }
+
+@media (max-width: 460px) {
+  .portal-figure { font-size: var(--t-lead); }
+  .portal-track-legend { flex-direction: column; gap: 2px; }
+}
